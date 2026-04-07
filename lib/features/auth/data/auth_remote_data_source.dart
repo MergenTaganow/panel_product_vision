@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:dio/dio.dart';
+import 'package:pub_semver/pub_semver.dart';
 
 import '../../../config/failure.dart';
 import '../../../core/api.dart';
@@ -20,6 +21,7 @@ abstract class AuthRemoteDataSource {
 
   Future<Either<Failure, BarcodeDataTypes>> fetchBarcodeData({required String barcodeData});
   Future<Either<Failure, DateTime?>> getServerDate();
+  Future<Either<Failure, Map<String, dynamic>>> getServerVersion();
 }
 
 class AuthRemoteDataImpl extends AuthRemoteDataSource {
@@ -62,7 +64,7 @@ class AuthRemoteDataImpl extends AuthRemoteDataSource {
           'Accept': "application/json",
         };
       }
-      var data = {'userName': username, 'password': password, 'program': 'alManufactory'};
+      var data = {'userName': username, 'password': password, 'program': 'panelImageUploader'};
       print('url is-- ${api.dio.options.baseUrl}');
       var response = await api.dio.post(
         '/admin/v1/employees/login',
@@ -123,6 +125,23 @@ class AuthRemoteDataImpl extends AuthRemoteDataSource {
       if (response.statusCode == 200) {
         var date = DateTime.tryParse((response.data['datetime']));
         return Right(date);
+      } else {
+        return Left(Failure(statusCode: response.statusCode, message: response.data['message']));
+      }
+    } catch (e) {
+      if (e is DioException) {
+        return Left(Failure(statusCode: e.response?.statusCode, message: e.message));
+      }
+      return const Left(Failure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, Map<String, dynamic>>> getServerVersion() async {
+    try {
+      final response = await api.dio.get('/app/PANEL_PRODUCT_VISION/lastVersion');
+      if (response.statusCode == 200) {
+        return Right(response.data);
       } else {
         return Left(Failure(statusCode: response.statusCode, message: response.data['message']));
       }

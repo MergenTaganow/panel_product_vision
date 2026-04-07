@@ -5,6 +5,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'config/injector.dart';
 import 'core/api.dart';
+import 'features/android_update/bloc/UpdateCubit/update_cubit.dart';
 import 'features/auth/bloc/aut_bloc/auth_bloc.dart';
 import 'features/global/bloc/boolean_filter_cubit/boolean_filter_cubit.dart';
 import 'features/global/bloc/date_time_check_cubit/date_time_check_cubit.dart';
@@ -43,6 +44,7 @@ void main() async {
         BlocProvider(create: (context) => sl<FileUplBloc>()),
         BlocProvider(create: (context) => sl<FileDeleteCubit>()),
         BlocProvider(create: (context) => sl<UpdateImageCubit>()),
+        BlocProvider(create: (context) => sl<UpdateCubit>()),
       ],
       child: const MyApp(),
     ),

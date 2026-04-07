@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-
 import 'accessible_divisions.dart';
 
 class User {
@@ -31,34 +30,36 @@ class User {
   List? alManufactory;
   List? mbManufactory;
   List<AccessibleDivision>? accessibleDivisions;
-  User(
-      {this.token,
-      this.uuid,
-      this.fullName,
-      this.name,
-      this.allTrucks,
-      this.trucks,
-      this.negativeStockAccess,
-      this.stock0Access,
-      this.stockAnalyzeAccess,
-      this.screenshotAccess,
-      this.saleAnalyzeAccess,
-      this.accessibleDivisions,
-      this.saleAnalyzeWithAmount,
-      this.printLabel,
-      this.alternativeView,
-      this.crossSaleView,
-      this.substituteView,
-      this.sectionCode,
-      this.stockPermissions,
-      this.client,
-      this.username,
-      this.clientSaleAnalyze,
-      this.viewPurchaseInfo,
-      this.sync,
-      this.alManufactory,
-      this.mbManufactory,
-      this.clientSaleAnalyzeWithAmount});
+
+  User({
+    this.token,
+    this.uuid,
+    this.fullName,
+    this.name,
+    this.allTrucks,
+    this.trucks,
+    this.negativeStockAccess,
+    this.stock0Access,
+    this.stockAnalyzeAccess,
+    this.screenshotAccess,
+    this.saleAnalyzeAccess,
+    this.accessibleDivisions,
+    this.saleAnalyzeWithAmount,
+    this.printLabel,
+    this.alternativeView,
+    this.crossSaleView,
+    this.substituteView,
+    this.sectionCode,
+    this.stockPermissions,
+    this.client,
+    this.username,
+    this.clientSaleAnalyze,
+    this.viewPurchaseInfo,
+    this.sync,
+    this.alManufactory,
+    this.mbManufactory,
+    this.clientSaleAnalyzeWithAmount,
+  });
 
   User.fromJson(Map<String, dynamic> json) {
     token = json['token'] != null ? json['token'] as String : null;
@@ -84,21 +85,25 @@ class User {
         json['item'].contains('clientSaleAnalyzeWithAmount') ? true : false;
     stockPermissions =
         json['stockPermissions'] != null ? (json['stockPermissions'] as bool) : false;
-    sectionCode = (json['sectionCode'] != null ? json['sectionCode'] as List : []).isNotEmpty
-        ? json['sectionCode']
-        : [];
+    sectionCode =
+        (json['sectionCode'] != null ? json['sectionCode'] as List : []).isNotEmpty
+            ? json['sectionCode']
+            : [];
     sync = (json['sync'] != null ? json['sync'] as List : []).isNotEmpty ? json['sync'] : [];
-    alManufactory = (json['alManufactory'] != null ? json['alManufactory'] as List : []).isNotEmpty
-        ? json['alManufactory']
-        : [];
-    mbManufactory = (json['mbManufactory'] != null ? json['mbManufactory'] as List : []).isNotEmpty
-        ? json['mbManufactory']
-        : [];
+    alManufactory =
+        (json['alManufactory'] != null ? json['alManufactory'] as List : []).isNotEmpty
+            ? json['alManufactory']
+            : [];
+    mbManufactory =
+        (json['mbManufactory'] != null ? json['mbManufactory'] as List : []).isNotEmpty
+            ? json['mbManufactory']
+            : [];
     client =
         (json['client'] != null ? json['client'] as List : []).isNotEmpty ? json['client'] : [];
-    accessibleDivisions = (json.containsKey("divisions"))
-        ? (json['divisions'] as List).map((e) => AccessibleDivision.fromMap(e)).toList()
-        : [];
+    accessibleDivisions =
+        (json.containsKey("divisions"))
+            ? (json['divisions'] as List).map((e) => AccessibleDivision.fromMap(e)).toList()
+            : [];
   }
 
   String toJson() {

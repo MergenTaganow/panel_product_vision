@@ -4,6 +4,7 @@ import 'package:panel_image_uploader/features/items/data/items_remote_data_sourc
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/api.dart';
+import '../features/android_update/bloc/UpdateCubit/update_cubit.dart';
 import '../features/auth/bloc/aut_bloc/auth_bloc.dart';
 import '../features/auth/data/auth_remote_data_source.dart';
 import '../features/auth/data/employee_local_data_source.dart';
@@ -16,6 +17,7 @@ import '../features/items/bloc/file_upl_bloc/file_upl_bloc.dart';
 import '../features/items/bloc/item_uuid/item_uuid_cubit.dart';
 import '../features/items/bloc/tab/tab_cubit.dart';
 import '../features/items/bloc/update_image_cubit/update_image_cubit.dart';
+import '../features/scan/bloc/barcode_data_fetcher/barcode_data_fetcher_cubit.dart';
 
 GetIt sl = GetIt.instance;
 Future<void> init() async {
@@ -28,12 +30,15 @@ Future<void> init() async {
   //auth
   sl.registerLazySingleton<AuthBloc>(() => AuthBloc(sl(), sl()));
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataImpl(sl(), sl()));
+  // sl.registerLazySingleton<DateTimeCheckCubit>(() => DateTimeCheckCubit(sl()));
 
   //glovbal
   sl.registerLazySingleton<BooleanFilterCubit>(() => BooleanFilterCubit());
   sl.registerLazySingleton<DateTimeCheckCubit>(() => DateTimeCheckCubit(sl()));
   sl.registerLazySingleton<KeyFilterCubit>(() => KeyFilterCubit());
   sl.registerLazySingleton<SortCubit>(() => SortCubit());
+  sl.registerLazySingleton<BarcodeDataFetcherCubit>(() => BarcodeDataFetcherCubit(sl()));
+  sl.registerLazySingleton<UpdateCubit>(() => UpdateCubit(sl()));
 
   //items
   sl.registerLazySingleton<ItemsRemoteDataSource>(() => ItemsRemoteDataImpl(sl(), sl()));

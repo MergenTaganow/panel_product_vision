@@ -5,7 +5,7 @@ import 'config/theme.dart';
 import 'features/global/data/dynamic_localization.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-String version = '';
+String version = '1.0.0';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -25,7 +25,6 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     DynamicLocalization.init(appLocale);
     getLang();
-    // checkForUpdate();
     super.initState();
   }
 

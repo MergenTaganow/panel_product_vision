@@ -8,16 +8,19 @@ import '../config/routes.dart';
 import '../features/auth/bloc/aut_bloc/auth_bloc.dart';
 import '../features/auth/data/employee_local_data_source.dart';
 
-String baseUrl = 'https://adminpanel.timix.org/api';
+// String baseUrl = 'https://adminpanel.timix.org/api';
+String baseUrl = 'https://timar.com.tm/api';
 
 initBaseUrl() {
   if (kDebugMode) {
     // baseUrl = 'http://172.20.14.8:8066/api';
-    // baseUrl = 'http://172.20.14.6:8066/api';
-    baseUrl = 'https://adminpanel.timix.org/api';
+    baseUrl = 'http://172.20.14.6:8066/api';
+    // baseUrl = 'https://adminpanel.timix.org/api';
+    // baseUrl = 'https://timar.com.tm/api';
   }
   if (kReleaseMode) {
-    baseUrl = 'https://adminpanel.timix.org/api';
+    // baseUrl = 'https://adminpanel.timix.org/api';
+    baseUrl = 'https://timar.com.tm/api';
   }
   //   baseUrl = 'http://119.235.112.154:4444/api';
   //  baseUrl = 'http://172.20.14.17:8066/api';
@@ -43,16 +46,10 @@ class Api {
     baseUrl = url;
   }
 
-  List<RefreshError> waitingList = [];
-  List<Request> requestList = [];
-
   Future initApiClient() async {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          print(options.path);
-          requestList.add(Request(options: options, handl: handler));
-
           // Add access token for non-authentication requests
           if (emplDs.user?.token != null) {
             options.headers['Authorization'] = "Bearer ${emplDs.user?.token}";

@@ -6,14 +6,14 @@ import '../../../../config/helpers.dart';
 import '../../../auth/data/auth_remote_data_source.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
-enum DateTimeStatus { correct, incorrect, checking, error, tryAgainFailed }
+enum DateTimeStatus { initial, correct, incorrect, checking, error, tryAgainFailed }
 
 class DateTimeCheckCubit extends Cubit<DateTimeStatus> {
   final AuthRemoteDataSource ds;
   static const _lastCheckedDateKey = 'last_checked_date';
   DateTime? _serverDate = null;
 
-  DateTimeCheckCubit(this.ds) : super(DateTimeStatus.checking);
+  DateTimeCheckCubit(this.ds) : super(DateTimeStatus.initial);
 
   Future<void> checkDateTime({
     Duration allowedDifference = const Duration(minutes: 10),
@@ -44,31 +44,47 @@ class DateTimeCheckCubit extends Cubit<DateTimeStatus> {
       return;
     }
     final failOrNot = await ds.getServerDate();
-    failOrNot.fold((l) {
-      emit(DateTimeStatus.error);
-    }, (r) async {
-      if (r == null) {
+    failOrNot.fold(
+      (l) {
         emit(DateTimeStatus.error);
-        return;
-      }
+      },
+      (r) async {
+        if (r == null) {
+          emit(DateTimeStatus.error);
+          return;
+        }
 
-      _serverDate = r;
-      final deviceTime = DateTime.now();
-      final difference = r.difference(deviceTime).abs();
+        _serverDate = r;
+        final deviceTime = DateTime.now();
+        final difference = r.difference(deviceTime).abs();
 
-      var status =
-          difference > allowedDifference ? DateTimeStatus.incorrect : DateTimeStatus.correct;
+        var status =
+            difference > allowedDifference ? DateTimeStatus.incorrect : DateTimeStatus.correct;
 
-      // Save today as last checked date
-      if (status == DateTimeStatus.correct) {
-        await prefs.setString(_lastCheckedDateKey, todayKey);
-      }
-      if (tryAgain && status == DateTimeStatus.incorrect) {
-        status = DateTimeStatus.tryAgainFailed;
-      }
+        // Save today as last checked date
+        if (status == DateTimeStatus.correct) {
+          await prefs.setString(_lastCheckedDateKey, todayKey);
+        }
+        if (tryAgain && status == DateTimeStatus.incorrect) {
+          status = DateTimeStatus.tryAgainFailed;
+        }
 
-      emit(status);
-    });
+        emit(status);
+      },
+    );
+  }
+
+  checkServer() async {
+    emit(DateTimeStatus.checking);
+    final failOrNot = await ds.getServerDate();
+    failOrNot.fold(
+      (l) {
+        emit(DateTimeStatus.error);
+      },
+      (r) async {
+        emit(DateTimeStatus.correct);
+      },
+    );
   }
 
   static String _dateKey(DateTime dt) => "${dt.year}-${dt.month}-${dt.day}";
@@ -81,9 +97,7 @@ void showTimeErrorPopup(BuildContext context) {
     barrierDismissible: false,
     builder: (context) {
       return Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: Padd(
           pad: 16,
           child: Column(
@@ -92,12 +106,8 @@ void showTimeErrorPopup(BuildContext context) {
               // Your SVG icon
               Svvg.asset('time_error'),
               const SizedBox(height: 10),
-               Text(
-                lg.wrongTime,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 17),
-              ),
-               Text(
+              Text(lg.wrongTime, textAlign: TextAlign.center, style: const TextStyle(fontSize: 17)),
+              Text(
                 lg.wrongTimeDesc,
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 17, color: Color(0xFFA1A1A1)),
@@ -116,14 +126,13 @@ void showTimeErrorPopup(BuildContext context) {
                       onPressed: () {
                         context.read<DateTimeCheckCubit>().checkDateTime(tryAgain: true);
                       },
-                      child: state == DateTimeStatus.checking
-                          ? Padd(
-                              ver: 4,
-                              child: const CircularProgressIndicator(
-                                color: Colors.white,
-                              ),
-                            )
-                          :  Text(lg.check, style: const TextStyle(color: Colors.white)),
+                      child:
+                          state == DateTimeStatus.checking
+                              ? Padd(
+                                ver: 4,
+                                child: const CircularProgressIndicator(color: Colors.white),
+                              )
+                              : Text(lg.check, style: const TextStyle(color: Colors.white)),
                     ),
                   );
                 },
