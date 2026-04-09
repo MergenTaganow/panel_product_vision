@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:panel_image_uploader/features/global/bloc/snackBar_cubit/snack_bar_cubit.dart';
 
 import '../../../config/colors.dart';
 import '../../../config/go.dart';
@@ -56,6 +57,17 @@ class _LoginPageState extends State<LoginPage> {
           listener: (context, state) {
             if (state == DateTimeStatus.incorrect) {
               showTimeErrorPopup(context);
+            }
+          },
+        ),
+        BlocListener<SnackBarCubit, SnackBarState>(
+          listener: (context, state) {
+            if (state is ShowSnackBar) {
+              CustomSnackBar.showSnackBar(
+                context: context,
+                title: state.title,
+                isError: state.isError,
+              );
             }
           },
         ),

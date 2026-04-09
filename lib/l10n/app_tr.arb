@@ -668,7 +668,9 @@
   "usage": "Ulanylyşy",
   "schema": "Shema suratlar",
   "embed": "Içerilen",
-  "changeIp": "Ip-ny üýtget"
+  "changeIp": "Ip-ny üýtget",
+  "youWereBlocked": "Siz bloklandyñyz",
+  "otherDeviceLeggedIn": "Başga enjamdan giriş edildi"
 
 
 

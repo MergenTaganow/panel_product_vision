@@ -10,6 +10,7 @@ import 'features/auth/bloc/aut_bloc/auth_bloc.dart';
 import 'features/global/bloc/boolean_filter_cubit/boolean_filter_cubit.dart';
 import 'features/global/bloc/date_time_check_cubit/date_time_check_cubit.dart';
 import 'features/global/bloc/key_filter_cubit/key_filter_cubit.dart';
+import 'features/global/bloc/snackBar_cubit/snack_bar_cubit.dart';
 import 'features/global/bloc/sort_cubit/sort_cubit.dart';
 import 'features/items/bloc/file_delete_cubit/file_delete_cubit.dart';
 import 'features/items/bloc/file_upl_bloc/file_upl_bloc.dart';
@@ -45,6 +46,7 @@ void main() async {
         BlocProvider(create: (context) => sl<FileDeleteCubit>()),
         BlocProvider(create: (context) => sl<UpdateImageCubit>()),
         BlocProvider(create: (context) => sl<UpdateCubit>()),
+        BlocProvider(create: (context) => sl<SnackBarCubit>()),
       ],
       child: const MyApp(),
     ),

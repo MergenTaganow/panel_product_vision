@@ -634,6 +634,8 @@
   "usage": "Использование",
   "schema": "Схема изображений",
   "embed": "Встроенное",
-  "changeIp": "Изменить Ip"
+  "changeIp": "Изменить Ip",
+  "youWereBlocked": "Вы заблокированы",
+  "otherDeviceLeggedIn": "Зашли с другого устройства"
 
 }

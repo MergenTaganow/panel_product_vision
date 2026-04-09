@@ -4,6 +4,7 @@ import 'accessible_divisions.dart';
 
 class User {
   String? token;
+  String? refreshToken;
   String? uuid;
   String? fullName;
   String? name;
@@ -33,6 +34,7 @@ class User {
 
   User({
     this.token,
+    this.refreshToken,
     this.uuid,
     this.fullName,
     this.name,
@@ -63,6 +65,7 @@ class User {
 
   User.fromJson(Map<String, dynamic> json) {
     token = json['token'] != null ? json['token'] as String : null;
+    refreshToken = json['refreshToken'] != null ? json['refreshToken'] as String : null;
     uuid = json['uuid'] != null ? json['uuid'] as String : null;
     fullName = json['fullName'] != null ? json['fullName'] as String : null;
     username = json['username'] != null ? json['username'] as String : null;
@@ -109,6 +112,7 @@ class User {
   String toJson() {
     final Map<String, dynamic> data = {};
     data['token'] = token;
+    data['refreshToken'] = refreshToken;
     data['uuid'] = uuid;
     data['fullName'] = fullName;
     data['name'] = name;

@@ -22,6 +22,7 @@ abstract class AuthRemoteDataSource {
   Future<Either<Failure, BarcodeDataTypes>> fetchBarcodeData({required String barcodeData});
   Future<Either<Failure, DateTime?>> getServerDate();
   Future<Either<Failure, Map<String, dynamic>>> getServerVersion();
+  Future<Either<Failure, User>> refreshToken();
 }
 
 class AuthRemoteDataImpl extends AuthRemoteDataSource {
@@ -75,6 +76,7 @@ class AuthRemoteDataImpl extends AuthRemoteDataSource {
         final userMap =
             response.data['accesses']..addAll({
               "token": response.data['token'],
+              "refreshToken": response.data['refreshToken'],
               "fullName": response.data['fullName'],
               'name': response.data['fullName'],
               'username': username,
@@ -142,6 +144,77 @@ class AuthRemoteDataImpl extends AuthRemoteDataSource {
       final response = await api.dio.get('/app/PANEL_PRODUCT_VISION/lastVersion');
       if (response.statusCode == 200) {
         return Right(response.data);
+      } else {
+        return Left(Failure(statusCode: response.statusCode, message: response.data['message']));
+      }
+    } catch (e) {
+      if (e is DioException) {
+        return Left(Failure(statusCode: e.response?.statusCode, message: e.message));
+      }
+      return const Left(Failure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> refreshToken() async {
+    try {
+      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      Map<String, dynamic>? header;
+      if (Platform.isAndroid) {
+        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        log('${androidInfo.manufacturer} ${androidInfo.model}');
+        header = {
+          'deviceName': '${androidInfo.manufacturer} ${androidInfo.model}',
+          'Sec-CH-UA-Platform': Platform.isAndroid ? 'Android' : 'Ios',
+          'Sec-CH-UA-Platform-Version': androidInfo.version,
+          'Sec-CH-UA-Model': '${androidInfo.manufacturer} ${androidInfo.model}',
+          'Sec-CH-UA-Mobile': true,
+          'Content-Type': 'application/json',
+          'Accept': "application/json",
+        };
+      } else if (Platform.isIOS) {
+        IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+        log(iosInfo.utsname.machine); // Log the machine name, e.g., 'iPhone13,2'
+
+        header = {
+          'deviceName': iosInfo.utsname.machine,
+          'Sec-CH-UA-Platform': Platform.isAndroid ? 'Android' : 'iOS',
+          'Sec-CH-UA-Platform-Version': iosInfo.systemVersion,
+          'Sec-CH-UA-Model': iosInfo.utsname.machine,
+          'Sec-CH-UA-Mobile': true,
+          'Content-Type': 'application/json',
+          'Accept': "application/json",
+        };
+      }
+      var data = {'program': 'panelImageUploader', "refreshToken": local.user?.refreshToken ?? ''};
+      var response = await api.dio.post(
+        '/admin/v1/employees/refresh',
+        data: data,
+        options: Options(headers: header),
+      );
+
+      print(response.statusCode);
+      print(response.data);
+      if (response.statusCode == 200) {
+        final userMap =
+            response.data['accesses']..addAll({
+              "token": response.data['token'],
+              "refreshToken": response.data['refreshToken'],
+              "fullName": response.data['fullName'],
+              'name': response.data['fullName'],
+              'uuid': response.data['uuid'],
+            });
+        if (!userMap.containsKey("item")) userMap['item'] = [];
+
+        User? user = User.fromJson(userMap);
+        // set token to dio header
+        final token = user.token;
+        if (token != null) {
+          api.dio.options.headers['Authorization'] = "Bearer $token";
+        }
+        // save user to local data source
+        local.saveUser(u: user);
+        return Right(user);
       } else {
         return Left(Failure(statusCode: response.statusCode, message: response.data['message']));
       }
