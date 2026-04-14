@@ -18,8 +18,8 @@ String baseUrl = 'https://timar.com.tm/api';
 initBaseUrl() {
   if (kDebugMode) {
     // baseUrl = 'http://172.20.14.8:8066/api';
-    baseUrl = 'http://172.20.14.6:8066/api';
-    // baseUrl = 'https://adminpanel.timix.org/api';
+    // baseUrl = 'http://172.20.14.6:8066/api';
+    baseUrl = 'https://adminpanel.timix.org/api';
     // baseUrl = 'https://timar.com.tm/api';
   }
   if (kReleaseMode) {

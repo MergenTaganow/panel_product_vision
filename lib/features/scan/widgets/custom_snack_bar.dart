@@ -1,8 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import '../../../config/colors.dart';
+import '../../../config/go.dart';
 import '../../../config/helpers.dart';
+import '../../../config/routes.dart';
+import '../../../core/api.dart';
+import '../../items/bloc/item_uuid/item_uuid_cubit.dart';
+import '../../items/models/item.dart';
 
 class Sizes {
   Sizes();
@@ -185,5 +193,100 @@ class BarcodeSnackBars {
     } catch (e) {
       // log('Failed to show Snackbar with title:$title');
     }
+  }
+
+  static Widget itemSnackBar(BuildContext context, Item? item) {
+    AppLocalizations lg = AppLocalizations.of(context)!;
+    bool itemWithDiscount = item?.discount != null && item?.discount != 0;
+    return GestureDetector(
+      onTap: () {
+        Routes.mainNavKey.currentState!.popUntil((route) => route.isFirst);
+        context.read<ItemUuidCubit>().setItem(item: item, fetchedFromBarcode: true);
+        Go.to(Routes.itemDetail);
+      },
+      child: StatefulBuilder(
+        builder: (context, set) {
+          return SizedBox(
+            width: MediaQuery.of(context).size.width - 60,
+            height: 130,
+            child: Row(
+              children: [
+                SizedBox(
+                  height: 100,
+                  width: 100,
+                  child: CachedNetworkImage(
+                    errorWidget:
+                        (c, v, d) => Image.asset('assets/images/place.png', fit: BoxFit.cover),
+                    fit: BoxFit.cover,
+                    placeholder:
+                        (context, url) =>
+                            item?.blurImg != null
+                                ? BlurHash(hash: item!.blurImg!)
+                                : Image.asset('assets/images/place.png', fit: BoxFit.cover),
+                    imageUrl: "$baseUrl/images/items/${item?.mediumImg}",
+                  ),
+                ),
+                const Box(w: 8),
+                Padd(
+                  ver: 24,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.45),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item?.name ?? '-',
+                            style: const TextStyle(fontSize: 15, color: Colors.black),
+                            maxLines: 2,
+                          ),
+                        ),
+                        if (item?.price != null)
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisSize: MainAxisSize.max,
+                            children: [
+                              GestureDetector(
+                                // onLongPress: () {
+                                //   context.read<OldPriceSystemCubit>().togglePriceSystem();
+                                //   set(() {});
+                                // },
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (item?.price != null && item?.price != 0)
+                                      Text(
+                                        item?.getPrice(),
+                                        style: TextStyle(
+                                          color: itemWithDiscount ? Col.borderColor : Col.primary,
+                                          fontSize: itemWithDiscount ? 14 : 15,
+                                        ),
+                                      ),
+                                    if (itemWithDiscount)
+                                      Text(
+                                        item?.getDiscountPrice(),
+                                        style: const TextStyle(color: Col.primary, fontSize: 15),
+                                      ),
+                                  ],
+                                ),
+                              ),
+                              const Icon(Icons.navigate_next, size: 24, color: Col.primary),
+                            ],
+                          ),
+                        if (item?.price == null)
+                          Text(
+                            lg.noPrice,
+                            style: const TextStyle(color: Col.primary, fontSize: 15),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 }

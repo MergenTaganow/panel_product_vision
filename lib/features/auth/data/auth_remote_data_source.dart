@@ -8,6 +8,8 @@ import 'package:pub_semver/pub_semver.dart';
 
 import '../../../config/failure.dart';
 import '../../../core/api.dart';
+import '../../../my_app.dart';
+import '../../items/models/item.dart';
 import '../../scan/bloc/barcode_data_fetcher/barcode_data_types.dart';
 import '../models/user.dart';
 import 'employee_local_data_source.dart';
@@ -108,10 +110,26 @@ class AuthRemoteDataImpl extends AuthRemoteDataSource {
   @override
   Future<Either<Failure, BarcodeDataTypes>> fetchBarcodeData({required String barcodeData}) async {
     try {
-      final response = await api.dio.get('/admin/v1/alManufactory/orders/qr/$barcodeData');
+      var queryParams = {
+        'language':
+            MyAppState.appLocale?.languageCode == 'tr'
+                ? 'tm'
+                : MyAppState.appLocale?.languageCode ?? 'tm',
+        'program': 'panelImageUploader',
+        'page': 'search',
+      };
+      final response = await api.dio.get(
+        '/qrEmployee/v1/items/barcode/$barcodeData',
+        queryParameters: queryParams,
+      );
 
       if (response.statusCode == 200) {
-        return Right(BarcodeDataTypes(type: BroadcastResponseModelTypes.mbProduct));
+        Item item = Item.fromMap(response.data);
+        BarcodeDataTypes barcodeDataType = BarcodeDataTypes(
+          type: BroadcastResponseModelTypes.item,
+          item: item,
+        );
+        return Right(barcodeDataType);
       } else {
         return const Left(Failure());
       }

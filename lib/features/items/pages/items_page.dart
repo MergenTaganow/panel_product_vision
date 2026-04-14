@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -41,7 +43,9 @@ class _ItemsPageState extends State<ItemsPage> {
 
   @override
   void initState() {
-    context.read<UpdateCubit>().checkUpdate();
+    if (Platform.isAndroid) {
+      context.read<UpdateCubit>().checkUpdate();
+    }
     context.read<DateTimeCheckCubit>().checkDateTime();
     // context.read<BroadcastCubit>().receiver.messages.listen((event) {
     //   var data =

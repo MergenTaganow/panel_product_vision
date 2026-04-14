@@ -9,6 +9,7 @@ import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
 import '../../../config/helpers.dart';
 import '../../auth/widgets/change_lang.dart';
 import '../bloc/barcode_data_fetcher/barcode_data_fetcher_cubit.dart';
+import '../widgets/custom_snack_bar.dart';
 import '../widgets/scan_animation.dart';
 
 class ScanPage extends StatefulWidget {
@@ -119,6 +120,15 @@ class ScanPageState extends State<ScanPage> with TickerProviderStateMixin {
             //     tBegin = const Offset(0, -1);
             //   });
             // }
+            if (state is BarcodeDataWasItem) {
+              setState(() {
+                animatingChild = BarcodeSnackBars.itemSnackBar(context, state.item);
+                cardBottom = 50;
+              });
+              cardAnimationController.forward().then((result) {
+                tBegin = const Offset(0, -1);
+              });
+            }
           },
         ),
       ],

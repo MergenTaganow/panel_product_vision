@@ -10,15 +10,15 @@ String version = '1.0.0';
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
   static void setLocale(BuildContext context, Locale newLocale) {
-    _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
+    MyAppState? state = context.findAncestorStateOfType<MyAppState>();
     state!.setLocale(newLocale);
   }
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<MyApp> createState() => MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> {
   static Locale? appLocale = const Locale('tr');
 
   @override
