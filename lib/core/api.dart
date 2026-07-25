@@ -67,9 +67,7 @@ class Api {
               try {
                 await _refreshTokenIfNeeded();
               } catch (e) {
-                print("onRequest,refresh catch--wil logout");
-                _logout();
-
+                // logout decision is already made inside _refreshTokenIfNeeded
                 return handler.reject(DioException(requestOptions: options, error: e));
               }
             }
@@ -86,40 +84,38 @@ class Api {
         },
         onError: (e, handler) async {
           log('Erroor ocured!');
-          //
           print((e.response?.statusCode).toString());
           print(e.response?.data);
-          if (e.response?.statusCode == 498) {
+
+          final statusCode = e.response?.statusCode;
+
+          // 498: token expired → refresh and retry
+          if (statusCode == 498) {
             try {
               await _refreshTokenIfNeeded();
               final opts = e.requestOptions;
               opts.headers['Authorization'] = "Bearer ${emplDs.user?.token}";
-
               final response = await dio.fetch(opts);
-
               return handler.resolve(response);
             } catch (_) {
-              _logout();
+              // logout decision already made inside _refreshTokenIfNeeded
               return handler.reject(DioException(requestOptions: e.requestOptions, error: e));
             }
           }
-          if (e.response?.statusCode == 401) {
-            _logout();
 
-            return handler.reject(DioException(requestOptions: e.requestOptions, error: e));
-          }
-          // Check if the error is network-related (offline)
-          if (e.type == DioExceptionType.connectionTimeout ||
-              e.type == DioExceptionType.receiveTimeout ||
-              e.type == DioExceptionType.sendTimeout ||
-              e.type == DioExceptionType.connectionError) {
-            log('Network error: User is likely offline.');
-            // Optionally show a message to the user or handle it gracefully
-            // Avoid logging out the user for network issues
-            return handler.reject(e);
-          } else {
+          // 4xx: logout (5xx and network errors just reject)
+          if (statusCode != null && statusCode >= 400 && statusCode < 500) {
+            if (statusCode == 403) {
+              _logout(message: "youWereBlocked");
+            } else if (statusCode == 409) {
+              _logout(message: "otherDeviceLeggedIn");
+            } else {
+              _logout();
+            }
             return handler.reject(e);
           }
+
+          return handler.reject(e);
         },
       ),
     );
@@ -142,10 +138,15 @@ class Api {
       var failOrNot = await sl<AuthRemoteDataSource>().refreshToken();
       failOrNot.fold(
         (l) {
-          if (l.statusCode == 403) {
+          final status = l.statusCode;
+          if (status != null && status >= 500) {
+            // 5xx on refresh: reject the original request without logging out
+          } else if (status == 403) {
             _logout(message: "youWereBlocked");
-          } else if (l.statusCode == 409) {
+          } else if (status == 409) {
             _logout(message: "otherDeviceLeggedIn");
+          } else {
+            _logout();
           }
           refreshCompleter?.completeError(l);
         },

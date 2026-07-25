@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:panel_image_uploader/features/global/bloc/snackBar_cubit/snack_bar_cubit.dart';
+import 'package:panel_image_uploader/features/global/data/dynamic_localization.dart';
 
 import '../../../config/colors.dart';
 import '../../../config/go.dart';
@@ -47,7 +48,7 @@ class _LoginPageState extends State<LoginPage> {
                 title:
                     state.failure.statusCode == 400
                         ? lg.usernameAndPasswordWrong
-                        : state.failure.message ?? lg.smthWentWrong,
+                        : DynamicLocalization.translate(state.failure.message ?? lg.smthWentWrong),
                 isError: true,
               );
             }

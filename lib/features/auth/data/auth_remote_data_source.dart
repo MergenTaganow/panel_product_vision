@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:pub_semver/pub_semver.dart';
 
 import '../../../config/failure.dart';
+import '../../../config/ios_device_names.dart';
 import '../../../core/api.dart';
 import '../../../my_app.dart';
 import '../../items/models/item.dart';
@@ -19,6 +20,8 @@ abstract class AuthRemoteDataSource {
     required String username,
     required String password,
     bool rememberMe = false,
+    double? latitude,
+    double? longitude,
   });
 
   Future<Either<Failure, BarcodeDataTypes>> fetchBarcodeData({required String barcodeData});
@@ -37,43 +40,31 @@ class AuthRemoteDataImpl extends AuthRemoteDataSource {
     required String username,
     required String password,
     bool rememberMe = false,
+    double? latitude,
+    double? longitude,
   }) async {
     try {
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-      Map<String, dynamic>? header;
+      String? header;
       if (Platform.isAndroid) {
         AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        log('${androidInfo.manufacturer} ${androidInfo.model}');
-        header = {
-          'deviceName': '${androidInfo.manufacturer} ${androidInfo.model}',
-          'Sec-CH-UA-Platform': Platform.isAndroid ? 'Android' : 'Ios',
-          'Sec-CH-UA-Platform-Version': androidInfo.version,
-          'Sec-CH-UA-Model': '${androidInfo.manufacturer} ${androidInfo.model}',
-          'Sec-CH-UA-Mobile': true,
-          'Content-Type': 'application/json',
-          'Accept': "application/json",
-        };
+        header = '${androidInfo.manufacturer} ${androidInfo.model}';
       } else if (Platform.isIOS) {
         IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        log(iosInfo.utsname.machine); // Log the machine name, e.g., 'iPhone13,2'
 
-        header = {
-          'deviceName': iosInfo.utsname.machine,
-          'Sec-CH-UA-Platform': Platform.isAndroid ? 'Android' : 'iOS',
-          'Sec-CH-UA-Platform-Version': iosInfo.systemVersion,
-          'Sec-CH-UA-Model': iosInfo.utsname.machine,
-          'Sec-CH-UA-Mobile': true,
-          'Content-Type': 'application/json',
-          'Accept': "application/json",
-        };
+        header = iosDeviceNames[iosInfo.utsname.machine];
       }
-      var data = {'userName': username, 'password': password, 'program': 'panelImageUploader'};
-      print('url is-- ${api.dio.options.baseUrl}');
-      var response = await api.dio.post(
-        '/admin/v1/employees/login',
-        data: data,
-        options: Options(headers: header),
-      );
+      var data = {
+        'userName': username,
+        'password': password,
+        'program': 'panelImageUploader',
+        'version': version,
+        'deviceInfo': header,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
+      };
+      print('url is-- ${api.dio.options.baseUrl}--$data');
+      var response = await api.dio.post('/admin/v1/employees/login', data: data);
       if (response.statusCode == 200) {
         final userMap =
             response.data['accesses']..addAll({
@@ -177,39 +168,22 @@ class AuthRemoteDataImpl extends AuthRemoteDataSource {
   Future<Either<Failure, User>> refreshToken() async {
     try {
       DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-      Map<String, dynamic>? header;
+      String? header;
       if (Platform.isAndroid) {
         AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        log('${androidInfo.manufacturer} ${androidInfo.model}');
-        header = {
-          'deviceName': '${androidInfo.manufacturer} ${androidInfo.model}',
-          'Sec-CH-UA-Platform': Platform.isAndroid ? 'Android' : 'Ios',
-          'Sec-CH-UA-Platform-Version': androidInfo.version,
-          'Sec-CH-UA-Model': '${androidInfo.manufacturer} ${androidInfo.model}',
-          'Sec-CH-UA-Mobile': true,
-          'Content-Type': 'application/json',
-          'Accept': "application/json",
-        };
+        header = '${androidInfo.manufacturer} ${androidInfo.model}';
       } else if (Platform.isIOS) {
         IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-        log(iosInfo.utsname.machine); // Log the machine name, e.g., 'iPhone13,2'
 
-        header = {
-          'deviceName': iosInfo.utsname.machine,
-          'Sec-CH-UA-Platform': Platform.isAndroid ? 'Android' : 'iOS',
-          'Sec-CH-UA-Platform-Version': iosInfo.systemVersion,
-          'Sec-CH-UA-Model': iosInfo.utsname.machine,
-          'Sec-CH-UA-Mobile': true,
-          'Content-Type': 'application/json',
-          'Accept': "application/json",
-        };
+        header = iosDeviceNames[iosInfo.utsname.machine];
       }
-      var data = {'program': 'panelImageUploader', "refreshToken": local.user?.refreshToken ?? ''};
-      var response = await api.dio.post(
-        '/admin/v1/employees/refresh',
-        data: data,
-        options: Options(headers: header),
-      );
+      var data = {
+        'program': 'panelImageUploader',
+        "refreshToken": local.user?.refreshToken ?? '',
+        'version': version,
+        'deviceInfo': header,
+      };
+      var response = await api.dio.post('/admin/v1/employees/refresh', data: data);
 
       print(response.statusCode);
       print(response.data);

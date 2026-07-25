@@ -670,7 +670,8 @@
   "embed": "Gözleg suratlary",
   "changeIp": "Ip-ny üýtget",
   "youWereBlocked": "Siz bloklandyñyz",
-  "otherDeviceLeggedIn": "Başga enjamdan giriş edildi"
+  "otherDeviceLeggedIn": "Başga enjamdan giriş edildi",
+  "locationRequired": "Giriş üçin GPS ýerleşigi talap edilýär. Rugsady açyň we täzeden synanşyň"
 
 
 

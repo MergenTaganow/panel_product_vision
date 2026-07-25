@@ -4,6 +4,7 @@ import 'package:panel_image_uploader/features/items/data/items_remote_data_sourc
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/api.dart';
+import '../core/location_service.dart';
 import '../features/android_update/bloc/UpdateCubit/update_cubit.dart';
 import '../features/auth/bloc/aut_bloc/auth_bloc.dart';
 import '../features/auth/data/auth_remote_data_source.dart';
@@ -29,7 +30,8 @@ Future<void> init() async {
   sl.registerLazySingleton<EmployeeLocalDataSource>(() => EmployeeLocalDataSourceImpl(pref: sl()));
 
   //auth
-  sl.registerLazySingleton<AuthBloc>(() => AuthBloc(sl(), sl()));
+  sl.registerLazySingleton<LocationService>(() => LocationService());
+  sl.registerLazySingleton<AuthBloc>(() => AuthBloc(sl(), sl(), sl()));
   sl.registerLazySingleton<AuthRemoteDataSource>(() => AuthRemoteDataImpl(sl(), sl()));
   // sl.registerLazySingleton<DateTimeCheckCubit>(() => DateTimeCheckCubit(sl()));
 

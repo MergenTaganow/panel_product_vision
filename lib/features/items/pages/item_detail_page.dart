@@ -33,6 +33,13 @@ class _ItemDetailPageState extends State<ItemDetailPage> with SingleTickerProvid
   List<Images?> embedImages = [];
   String? itemUuid;
 
+
+  @override
+  void deactivate() {
+    context.read<FileUplBloc>().add(ClearUploading());
+    super.deactivate();
+  }
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocListener(
