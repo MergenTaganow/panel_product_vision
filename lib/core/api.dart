@@ -103,18 +103,6 @@ class Api {
             }
           }
 
-          // 4xx: logout (5xx and network errors just reject)
-          if (statusCode != null && statusCode >= 400 && statusCode < 500) {
-            if (statusCode == 403) {
-              _logout(message: "youWereBlocked");
-            } else if (statusCode == 409) {
-              _logout(message: "otherDeviceLeggedIn");
-            } else {
-              _logout();
-            }
-            return handler.reject(e);
-          }
-
           return handler.reject(e);
         },
       ),
@@ -141,12 +129,16 @@ class Api {
           final status = l.statusCode;
           if (status != null && status >= 500) {
             // 5xx on refresh: reject the original request without logging out
-          } else if (status == 403) {
-            _logout(message: "youWereBlocked");
-          } else if (status == 409) {
-            _logout(message: "otherDeviceLeggedIn");
-          } else {
-            _logout();
+          } else if (status != null && status >= 400 && status < 500) {
+            if (status == 403) {
+              _logout(message: "youWereBlocked");
+            } else if (status == 409) {
+              _logout(message: "otherDeviceLeggedIn");
+            } else if (status == 426) {
+              _logout(message: "updateRequired");
+            } else {
+              _logout();
+            }
           }
           refreshCompleter?.completeError(l);
         },

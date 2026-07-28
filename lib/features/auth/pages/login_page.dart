@@ -66,7 +66,7 @@ class _LoginPageState extends State<LoginPage> {
             if (state is ShowSnackBar) {
               CustomSnackBar.showSnackBar(
                 context: context,
-                title: state.title,
+                title: DynamicLocalization.translate(state.title),
                 isError: state.isError,
               );
             }

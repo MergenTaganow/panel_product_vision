@@ -57,7 +57,7 @@ class AuthRemoteDataImpl extends AuthRemoteDataSource {
       var data = {
         'userName': username,
         'password': password,
-        'program': 'panelImageUploader',
+        'program': 'PANEL_PRODUCT_VISION',
         'version': version,
         'deviceInfo': header,
         if (latitude != null) 'latitude': latitude,
@@ -106,7 +106,7 @@ class AuthRemoteDataImpl extends AuthRemoteDataSource {
             MyAppState.appLocale?.languageCode == 'tr'
                 ? 'tm'
                 : MyAppState.appLocale?.languageCode ?? 'tm',
-        'program': 'panelImageUploader',
+        'program': 'PANEL_PRODUCT_VISION',
         'page': 'search',
       };
       final response = await api.dio.get(
@@ -178,7 +178,7 @@ class AuthRemoteDataImpl extends AuthRemoteDataSource {
         header = iosDeviceNames[iosInfo.utsname.machine];
       }
       var data = {
-        'program': 'panelImageUploader',
+        'program': 'PANEL_PRODUCT_VISION',
         "refreshToken": local.user?.refreshToken ?? '',
         'version': version,
         'deviceInfo': header,
